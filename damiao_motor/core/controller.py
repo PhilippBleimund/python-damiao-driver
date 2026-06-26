@@ -147,15 +147,15 @@ class DaMiaoController:
         """
         if bustype == "gs_usb":
             channel = _resolve_gs_usb_channel(channel)
-        bus_kwargs: Dict[str, Any] = {
+        self.bus_kwargs: Dict[str, Any] = {
             "channel": channel,
             "interface": bustype,
             "fd": fd,
             **kwargs,
         }
         if bitrate is not None:
-            bus_kwargs["bitrate"] = bitrate
-        self.bus: can.Bus = can.interface.Bus(**bus_kwargs)
+            self.bus_kwargs["bitrate"] = bitrate
+        self.bus: can.Bus = can.interface.Bus(**self.bus_kwargs)
         # Keyed by command CAN ID (motor_id)
         self.motors: Dict[int, DaMiaoMotor] = {}
         # Keyed by logical motor ID (embedded in feedback frame)
@@ -228,6 +228,52 @@ class DaMiaoController:
             Iterable of ``DaMiaoMotor`` instances.
         """
         return self.motors.values()
+
+    # -----------------------
+    # Can fd helpers
+    # -----------------------
+    def switch_to_can_baud_rate(self, baudrate: int = 4, persist: bool = False):
+        """
+        Switch all registered motors to can fd.
+        
+        Args:
+            baudrate: Register Value. Default at 9=5M.
+        """
+        from .motor import CAN_BAUD_RATE_CODES, CAN_FD_BAUD_RATE_CODES
+
+        if persist:
+            self.disable_all()
+
+        if (baudrate in CAN_BAUD_RATE_CODES and self._fd == False) or (baudrate in CAN_FD_BAUD_RATE_CODES and self._fd == True):
+            # only need to switch the rate
+            for m in self.all_motors():
+                m.set_can_baud_rate(baudrate, persist=persist)
+        elif baudrate in CAN_FD_BAUD_RATE_CODES and self._fd == False or baudrate in CAN_BAUD_RATE_CODES and self._fd == True:
+            for m in self.all_motors():
+                m.set_can_baud_rate(baudrate, persist=False)
+            self._fd = not self._fd
+
+            self.bus_kwargs["fd"] = self._fd
+
+            self._stop_polling()
+            self.bus.shutdown()
+            self.bus: can.Bus = can.interface.Bus(**self.bus_kwargs)
+
+            for m in self.all_motors():
+                m.bus = self.bus
+
+            self._polling_active = False
+            self._start_polling()
+
+            for m in self.all_motors():
+                m.enable_fd(self._fd)
+                if persist:
+                    m.store_parameters()
+
+
+
+        
+
 
     # -----------------------
     # Enable / disable

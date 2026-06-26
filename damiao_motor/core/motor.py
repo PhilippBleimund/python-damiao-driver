@@ -1010,6 +1010,15 @@ class DaMiaoMotor:
         return results
 
     # -----------------------
+    # Bus change helpers
+    # -----------------------
+
+    def enable_fd(self, fd: bool = True):
+        """Enables can fd. Baudrate in Register 35 should be greater than 1M."""
+        self._fd = fd
+
+
+    # -----------------------
     # Limit setters and mapping helpers
     # -----------------------
     def set_p_limits(self, p_min: float, p_max: float) -> None:
@@ -1165,7 +1174,7 @@ class DaMiaoMotor:
         """Set speed loop enhancement coefficient (register 34)."""
         self.write_register(34, value)
 
-    def set_can_baud_rate(self, baud_rate_code: int, store: bool = True) -> None:
+    def set_can_baud_rate(self, baud_rate_code: int, persist: bool = True) -> None:
         """
         Set CAN baud rate using register 35 (can_br).
 
@@ -1181,5 +1190,5 @@ class DaMiaoMotor:
             )
 
         self.write_register(35, baud_rate_code)  # Register 35 is can_br
-        if store:
+        if persist:
             self.store_parameters()  # Store to flash so it persists
