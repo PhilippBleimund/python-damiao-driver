@@ -971,6 +971,7 @@ class DaMiaoMotor:
         """
         Store all parameters to flash memory.
         After successful write, all parameters will be written to the chip.
+        Only works if motor is in disabled Mode.
         """
         self._send_register_cmd(0xAA, 0x01)
 
