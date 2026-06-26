@@ -1165,7 +1165,7 @@ class DaMiaoMotor:
         """Set speed loop enhancement coefficient (register 34)."""
         self.write_register(34, value)
 
-    def set_can_baud_rate(self, baud_rate_code: int) -> None:
+    def set_can_baud_rate(self, baud_rate_code: int, store: bool = True) -> None:
         """
         Set CAN baud rate using register 35 (can_br).
 
@@ -1181,4 +1181,5 @@ class DaMiaoMotor:
             )
 
         self.write_register(35, baud_rate_code)  # Register 35 is can_br
-        self.store_parameters()  # Store to flash so it persists
+        if store:
+            self.store_parameters()  # Store to flash so it persists
