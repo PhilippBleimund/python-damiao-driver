@@ -1048,6 +1048,14 @@ class DaMiaoMotor:
             self._t_max = t_max
 
     # -----------------------
+    # Bus change helpers
+    # -----------------------
+
+    def enable_fd(self, fd: bool = True):
+        """Enables can fd. Baudrate in Register 35 should be greater than 1M."""
+        self._fd = fd
+
+    # -----------------------
     # Setter methods for all writable registers
     # -----------------------
     def set_under_voltage_protection(self, value: float) -> None:
