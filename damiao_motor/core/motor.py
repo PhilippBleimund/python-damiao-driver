@@ -1182,7 +1182,7 @@ class DaMiaoMotor:
         Raises:
             ValueError: If baud_rate_code is not in valid range [0, 9]
         """
-        if baud_rate_code not in CAN_BAUD_RATE_CODES or baud_rate_code not in CAN_FD_BAUD_RATE_CODES:
+        if baud_rate_code not in CAN_BAUD_RATE_CODES and baud_rate_code not in CAN_FD_BAUD_RATE_CODES:
             raise ValueError(
                 f"Invalid baud rate code: {baud_rate_code}. Must be in {list(CAN_BAUD_RATE_CODES.keys())} or {list(CAN_FD_BAUD_RATE_CODES.keys())}"
             )
